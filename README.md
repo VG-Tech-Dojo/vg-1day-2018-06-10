@@ -19,6 +19,7 @@ $ make docker/build
 # xxx は 設定した nickname
 $ make docker/deps/xxx
 $ make docker/run/xxx
+$ make docker/test/xxx
 ```
 
 ## Vagrant 環境
