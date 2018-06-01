@@ -1,8 +1,8 @@
 nickname=
 repository_name=$(shell basename $(PWD))
 
-DOCKER_IMAGE        := $(repository_name)
-DOCKER_WORKDIR_BASE := /go/src/github.com/VG-Tech-Dojo/vg-1day-2018
+DOCKER_IMAGE   := $(repository_name)
+DOCKER_WORKDIR := /go/src/github.com/VG-Tech-Dojo/vg-1day-2018
 
 .PHONY: setup/* docker/*
 
@@ -27,20 +27,17 @@ $(nickname):
 docker/build:
 	docker build -t $(DOCKER_IMAGE) .
 
-docker/deps:
-	docker run --rm -v $(CURDIR):$(DOCKER_WORKDIR_BASE) -it --workdir $(DOCKER_WORKDIR_BASE)/original $(DOCKER_IMAGE) deps
+docker/deps: docker/deps/original
 
-docker/run:
-	docker run --rm -v $(CURDIR):$(DOCKER_WORKDIR_BASE) -it --workdir $(DOCKER_WORKDIR_BASE)/original -p 8080:8080 $(DOCKER_IMAGE)
+docker/run: docker/run/original
 
-docker/test:
-	docker run --rm -v $(CURDIR):$(DOCKER_WORKDIR_BASE) -it --workdir $(DOCKER_WORKDIR_BASE)/original $(DOCKER_IMAGE) test
+docker/test: docker/test/original
 
 docker/deps/%: $(@F)
-	docker run --rm -v $(CURDIR):$(DOCKER_WORKDIR_BASE) -it --workdir $(DOCKER_WORKDIR_BASE)/$(@F) $(DOCKER_IMAGE) deps
+	docker run --rm -v $(CURDIR):$(DOCKER_WORKDIR) -it $(DOCKER_IMAGE) -C $(@F) deps
 
 docker/run/%: $(@F)
-	docker run --rm -v $(CURDIR):$(DOCKER_WORKDIR_BASE) -it --workdir $(DOCKER_WORKDIR_BASE)/$(@F) -p 8080:8080 $(DOCKER_IMAGE)
+	docker run --rm -v $(CURDIR):$(DOCKER_WORKDIR) -it -p 8080:8080 $(DOCKER_IMAGE) -C $(@F) run
 
 docker/test/%: $(@F)
-	docker run --rm -v $(CURDIR):$(DOCKER_WORKDIR_BASE) -it --workdir $(DOCKER_WORKDIR_BASE)/$(@F) $(DOCKER_IMAGE) test
+	docker run --rm -v $(CURDIR):$(DOCKER_WORKDIR) -it $(DOCKER_IMAGE) -C $(@F) test
