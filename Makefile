@@ -23,6 +23,7 @@ setup/gnu: $(nickname) ## for linux
 
 $(nickname):
 	cp -rf original $(nickname)
+	echo "vendor/*" >> $(nickname)/.gitignore
 
 docker/build:
 	docker build -t $(DOCKER_IMAGE) .
