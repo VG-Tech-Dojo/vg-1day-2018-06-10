@@ -56,18 +56,22 @@ func (p *OmikujiProcessor) Process(msgIn *model.Message) (*model.Message, error)
 
 // Process はメッセージ本文からキーワードを抽出します
 func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error) {
-	r := regexp.MustCompile("\\Akeyword (.*)\\z")
+	r := regexp.MustCompile("\\Akeyword (.+)")
 	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	if len(matchedStrings) != 2 {
+		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
+	}
+
 	text := matchedStrings[1]
 
-	url := fmt.Sprintf(keywordAPIURLFormat, env.KeywordAPIAppID, url.QueryEscape(text))
+	requestURL := fmt.Sprintf(keywordAPIURLFormat, env.KeywordAPIAppID, url.QueryEscape(text))
 
 	type keywordAPIResponse map[string]interface{}
-	var json keywordAPIResponse
-	get(url, &json)
+	var response keywordAPIResponse
+	get(requestURL, &response)
 
-	keywords := []string{}
-	for k, v := range json {
+	keywords := make([]string, 0, len(response))
+	for k, v := range response {
 		if k == "Error" {
 			return nil, fmt.Errorf("%#v", v)
 		}
