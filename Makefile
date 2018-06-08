@@ -2,7 +2,7 @@ nickname=
 repository_name=$(shell basename $(PWD))
 
 DOCKER_IMAGE   := $(repository_name)
-DOCKER_WORKDIR := /go/src/github.com/VG-Tech-Dojo/vg-1day-2018
+DOCKER_WORKDIR := /go/src/github.com/VG-Tech-Dojo/vg-1day-2018-06-10
 
 .PHONY: setup/* docker/*
 
@@ -12,14 +12,14 @@ setup/mac: $(nickname)
 setup/bsd: $(nickname) ## for mac
 	sed -i '' -e 's/original/$(nickname)/g' ./$(nickname)/*.go
 	sed -i '' -e 's/original/$(nickname)/g' ./$(nickname)/**/*.go
-	sed -i '' -e 's/vg-1day-2018/$(repository_name)/g' ./$(nickname)/*.go
-	sed -i '' -e 's/vg-1day-2018/$(repository_name)/g' ./$(nickname)/**/*.go
+	sed -i '' -e 's/vg-1day-2018-06-10/$(repository_name)/g' ./$(nickname)/*.go
+	sed -i '' -e 's/vg-1day-2018-06-10/$(repository_name)/g' ./$(nickname)/**/*.go
 
 setup/gnu: $(nickname) ## for linux
 	sed --in-place 's/original/$(nickname)/g' ./$(nickname)/*.go
 	sed --in-place 's/original/$(nickname)/g' ./$(nickname)/**/*.go
-	sed --in-place 's/vg-1day-2018/$(repository_name)/g' ./$(nickname)/*.go
-	sed --in-place 's/vg-1day-2018/$(repository_name)/g' ./$(nickname)/**/*.go
+	sed --in-place 's/vg-1day-2018-06-10/$(repository_name)/g' ./$(nickname)/*.go
+	sed --in-place 's/vg-1day-2018-06-10/$(repository_name)/g' ./$(nickname)/**/*.go
 
 $(nickname):
 	cp -rf original $(nickname)
