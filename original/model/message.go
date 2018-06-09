@@ -73,3 +73,11 @@ func (m *Message) Insert(db *sql.DB) (*Message, error) {
 
 // Mission 1-2. メッセージを削除しよう
 // ...
+func (m *Message) Delete(db *sql.DB) error {
+       _, err := db.Exec(`DELETE FROM message WHERE id = ?`, m.ID)
+       if err != nil {
+               return err
+       }
+
+       return nil
+}
