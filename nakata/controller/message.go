@@ -130,5 +130,22 @@ func (m *Message) UpdateByID(c *gin.Context) {
 func (m *Message) DeleteByID(c *gin.Context) {
 	// Mission 1-2. メッセージを削除しよう
 	// ...
+	var msg model.Message
+
+	if err := c.BindJSON(&msg); err != nil {
+		resp := httputil.NewErrorResponse(err)
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+
+	deleted, err := msg.RemoveMessage(m.DB)
+	if err != nil {
+		resp := httputil.NewErrorResponse(err)
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+
+	// bot対応
+	m.Stream <- deleted
 	c.JSON(http.StatusOK, gin.H{})
 }
