@@ -38,6 +38,19 @@ func (p *HelloWorldProcessor) Process(msgIn *model.Message) (*model.Message, err
 	}, nil
 }
 
+// dice APIのレスポンス型
+type apiResponse struct {
+	OK     bool       `json: "ok"`
+	Secret bool       `json: "secret"`
+	Result string     `json: "result"`
+	Dices  []diceFace `json: "dices"`
+}
+
+type diceFace struct {
+	Face  int `json: "face"`
+	Value int `json: "value"`
+}
+
 // Process は"大吉", "吉", "中吉", "小吉", "末吉", "凶"のいずれかがbodyにセットされたメッセージへのポインタを返します
 func (p *OmikujiProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	fortunes := []string{
