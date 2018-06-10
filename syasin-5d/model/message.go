@@ -86,5 +86,14 @@ func (m *Message) Edit(db *sql.DB) (*Message, error) {
 	}
 	return msg, nil
 }
+
 // Mission 1-2. メッセージを削除しよう
 // ...
+func (m *Message) Delete(db *sql.DB)  error{
+	_, err := db.Exec(`delete from message where id = ?`, m.ID)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
