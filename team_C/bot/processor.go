@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"fmt"
+	"log"
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/team_C/env"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/team_C/model"
@@ -13,6 +14,7 @@ import (
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
+	diceAPIURLFormat    = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
 )
 
 type (
@@ -99,8 +101,15 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 	}, nil
 }
 
+func getReult(dice_msg string) string {
+	rep := regexp.MustCompile(`^roll: `)
+	input := rep.ReplaceAllString(dice_msg, "")
+	return input
+}
+
 // Process はメッセージ本文から面の数とダイスの数を抽出します
 func (p *DiceProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+
 	r := regexp.MustCompile("\\Akeyword (.+)")
 	matchedStrings := r.FindStringSubmatch(msgIn.Body)
 	if len(matchedStrings) != 2 {

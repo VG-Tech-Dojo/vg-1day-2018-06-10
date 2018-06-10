@@ -105,7 +105,7 @@ func NewKeywordBot(out chan *model.Message) *Bot {
 func NewDiceBot(out chan *model.Message) *Bot {
 	in := make(chan *model.Message)
 
-	checker := NewRegexpChecker("^roll: \\S+?$")
+	checker := NewRegexpChecker("\\Aroll:")
 
 	processor := &DiceProcessor{}
 
