@@ -117,3 +117,20 @@ func NewGachaBot(out chan *model.Message) *Bot {
 		processor: processor,
 	}
 }
+
+// mission2-2 チャットBot
+func NewChatBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Achat .+")
+
+	processor := &ChatProcessor{}
+
+	return &Bot{
+		name:      "chatbot",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+}
