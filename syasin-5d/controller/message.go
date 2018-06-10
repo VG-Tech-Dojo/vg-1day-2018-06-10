@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/httputil"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/model"
@@ -103,7 +104,14 @@ func (m *Message) UpdateByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
-	
+	i := c.Param("id")
+	id, err := strconv.ParseInt(i, 10, 64)
+	if err != nil {
+		resp := httputil.NewErrorResponse(err)
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	msg.ID = id
 	edited, err := msg.Edit(m.DB)
 	if err != nil {
 		resp := httputil.NewErrorResponse(err)
