@@ -70,6 +70,14 @@ func (m *Message) Insert(db *sql.DB) (*Message, error) {
 
 // Mission 1-1. メッセージを編集しよう
 // ...
+func (m *Message) UpdateById(db *sql.DB) (*Message, error) {
+	_, err := db.Exec(`update message set body = ? where id = ?`, m.Body, m.ID)
+	// Tutorial 1-1. ユーザー名を表示しよう
+	if  err != nil {
+		return nil, err
+	}
+	return m, nil
+}
 
 // Mission 1-2. メッセージを削除しよう
 // ...
