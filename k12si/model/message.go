@@ -89,3 +89,26 @@ func (m *Message) Update(db *sql.DB) (*Message, error) {
 }
 // Mission 1-2. メッセージを削除しよう
 // ...
+
+func (m *Message) Tip(db *sql.DB, target string, amount int) (*Message, error){
+
+	var targetBalance int
+	if err := db.QueryRow(`select balance from message where username = ?`, target).Scan(&targetBalance); err != nil {
+		return nil, err
+	}
+
+	var ownBalance int
+	if err := db.QueryRow(`select balance from message where username = ?`, m.UserName).Scan(&ownBalance); err != nil {
+		return nil, err
+	}
+
+	_, err := db.Exec(`update message set balance = ? where username = ?`, targetBalance + amount, target)
+	if err != nil {
+		return nil, err
+	}
+	_, err = db.Exec(`update message set balance = ? where username = ?`, ownBalance - amount, m.UserName)
+	if err != nil {
+		return nil, err
+	}
+	return m.Insert(db)
+}
