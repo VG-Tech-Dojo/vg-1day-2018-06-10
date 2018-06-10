@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
 // Message is controller for requests to messages
 type Message struct {
 	DB     *sql.DB
