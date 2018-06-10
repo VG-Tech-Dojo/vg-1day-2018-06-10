@@ -105,6 +105,7 @@
         return fetch(`/api/messages/${updatedMessage.id}`, {
           method: 'PUT',
           body: JSON.stringify(updatedMessage),
+          username: JSON.stringify(updatedMessage),
         })
         .then(response => response.json())
         .then(response => {
