@@ -8,7 +8,7 @@ import (
 type Message struct {
 	ID   int64  `json:"id"`
 	Body string `json:"body"`
-	Username string `json:"username"`
+  Username string `json:"username"`
 	// Tutorial 1-1. ユーザー名を表示しよう
 }
 
@@ -27,7 +27,7 @@ func MessagesAll(db *sql.DB) ([]*Message, error) {
 		m := &Message{}
 		// Tutorial 1-1. ユーザー名を表示しよう
 		if err := rows.Scan(&m.ID, &m.Body, &m.Username); err != nil {
-			return nil, err
+		return nil, err
 		}
 		ms = append(ms, m)
 	}
