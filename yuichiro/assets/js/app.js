@@ -15,7 +15,7 @@
       }
     },
     // Tutorial 1-1. ユーザー名を表示しよう
-    template: `
+    template:
     <div class="message">
       <div v-if="editing">
         <div class="row">
@@ -30,7 +30,7 @@
         <span class="action-button u-pull-right" v-on:click="remove">&#10007;</span>
       </div>
     </div>
-  `,
+  ,
     methods: {
       remove() {
         this.removeMessage(this.id)
