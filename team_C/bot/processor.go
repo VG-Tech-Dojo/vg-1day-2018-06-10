@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"fmt"
-	"log"
-
 	"net/url"
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/team_C/env"
@@ -106,6 +104,18 @@ func getReult(dice_msg string) string {
 	rep := regexp.MustCompile(`^roll: `)
 	input := rep.ReplaceAllString(dice_msg, "")
 	return input
+}
+
+func postDice(dice string)apiResponse{
+		v := url.Values{}
+		v.Set("system", "Cthulhu")
+		v.Set("command", dice)
+
+		url := "https://www.taruki.com/bcdice-api/v1/diceroll?" + v.Encode()
+		var response apiResponse
+		get(url, &response)
+
+		return response
 }
 
 // Process はメッセージ本文から面の数とダイスの数を抽出します
