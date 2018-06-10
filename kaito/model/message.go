@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 // Message はメッセージの構造体です
@@ -84,8 +85,9 @@ func (m *Message) UpdateById(db *sql.DB) (*Message, error) {
 // Mission 1-2. メッセージを削除しよう
 // ...
 
-func (m *Message) DeleteById(db *sql.DB) (*Message, error) {
-	_, err := db.Exec(`delete from  message where id = ?`, m.ID)
+func (m *Message) DeleteById(db *sql.DB, id string) (*Message, error) {
+	fmt.Print(m.ID)
+	_, err := db.Exec(`delete from  message where id = ?`, id)
 	// Tutorial 1-1. ユーザー名を表示しよう
 	if  err != nil {
 		return nil, err

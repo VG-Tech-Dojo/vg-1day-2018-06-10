@@ -119,12 +119,6 @@ func (m *Message) DeleteByID(c *gin.Context) {
 	// ...
 	var msg model.Message
 
-	if err := c.BindJSON(&msg); err != nil {
-		resp := httputil.NewErrorResponse(err)
-		c.JSON(http.StatusInternalServerError, resp)
-		return
-	}
-
-	msg.DeleteById(m.DB)
+	msg.DeleteById(m.DB, c.Param("id"))
 	c.JSON(http.StatusOK, gin.H{})
 }
