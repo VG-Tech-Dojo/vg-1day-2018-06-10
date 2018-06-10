@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/httputil"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/model"
@@ -129,23 +130,24 @@ func (m *Message) UpdateByID(c *gin.Context) {
 // DeleteByID は...
 func (m *Message) DeleteByID(c *gin.Context) {
 	// Mission 1-2. メッセージを削除しよう
-	// ...
+	// 答えのコピペ
 	var msg model.Message
-
-	if err := c.BindJSON(&msg); err != nil {
+	i := c.Param("id")
+	id, err := strconv.ParseInt(i, 10, 64) // 文字列から数値へ
+	if err != nil {
 		resp := httputil.NewErrorResponse(err)
-		c.JSON(http.StatusInternalServerError, resp)
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
-
-	deleted, err := msg.RemoveMessage(m.DB)
+	msg.ID = id
+	_, err = msg.RemoveMessage(m.DB) // 削除
 	if err != nil {
 		resp := httputil.NewErrorResponse(err)
 		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
-
-	// bot対応
-	m.Stream <- deleted
-	c.JSON(http.StatusOK, gin.H{})
+	c.JSON(http.StatusOK, gin.H{
+		"result": nil,
+		"error":  nil,
+	})
 }
