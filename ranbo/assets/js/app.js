@@ -24,10 +24,10 @@
           <button v-on:click="cancelEdit">Cancel</button>
         </div>
       </div>
-      <div class="message-body" v-else>
-        <span>{{ body }} - {{ username }}</span>
-        <span class="action-button u-pull-right" v-on:click="edit">&#9998;</span>
-        <span class="action-button u-pull-right" v-on:click="remove">&#10007;</span>
+      <div class="message-body" style="position:relative;" v-else>
+        <span style="display:block;"><p v-html="body"></p> - {{username}}</span>
+        <span style="position:absolute; top:0; right:0;" class="action-button u-pull-right" v-on:click="edit">&#9998;</span>
+        <span style="position:absolute; top:0; right:1em;" class="action-button u-pull-right" v-on:click="remove">&#10007;</span>
       </div>
     </div>
   `,
@@ -49,7 +49,7 @@
             this.cancelEdit()
           })
       }
-    }
+   }
   });
 
   const app = new Vue({
