@@ -36,7 +36,6 @@ type (
 
 	// GachaProcessor
 	GachaProcessor struct{}
-
 	// TipBotProcessor
 	TipBotProcessor struct{}
 )
@@ -77,8 +76,6 @@ func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	}, nil
 }
 
-
-
 // Process はメッセージ本文からキーワードを抽出します
 func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	r := regexp.MustCompile("\\Akeyword (.+)")
@@ -110,32 +107,34 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 
 // Talk はメッセージ本文からreplyを生成します
 func (p *ChatBotProcessor) Process(msgIn *model.Message) (*model.Message, error) {
-	r := regexp.MustCompile("\\Atalk (.+)")
-	matchedStrings := r.FindStringSubmatch(msgIn.Body)
-
-	text := matchedStrings[1]
-
-	params := url.Values{}
-	params.Set("apikey", env.ChatBotAPIAppID)
-	params.Add("query", text)
-	
-	res := &struct {
-		Status int64 `json:status`
-		Message string `json:message`
-		Results []struct {
-			Perplexity float64 `json:perplexity`
-			Reply string `json:reply`
-		} `json:results`
-	}{}
-
-	post(chatbotAPIURLFormat, params, res)
-
-	if res.Status != 0 {
-		return nil, fmt.Errorf("%#v", res)
-	}
+	//	r := regexp.MustCompile("\\Atalk (.+)")
+	//	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	//
+	//	text := matchedStrings[1]
+	//
+	//	params := url.Values{}
+	//	//	params.Set("apikey", env.ChatBotAPIAppID)
+	//	params.Add("query", text)
+	//
+	//	res := &struct {
+	//		Status  int64  `json:status`
+	//		Message string `json:message`
+	//		Results []struct {
+	//			Perplexity float64 `json:perplexity`
+	//			Reply      string  `json:reply`
+	//		} `json:results`
+	//	}{}
+	//
+	//	post(chatbotAPIURLFormat, params, res)
+	//
+	//	if res.Status != 0 {
+	//		return nil, fmt.Errorf("%#v", res)
+	//	}
+	//
 
 	return &model.Message{
-		Body: res.Results[0].Reply,
+		//Body: res.Results[0].Reply,
+		Body: "",
 	}, nil
 }
 

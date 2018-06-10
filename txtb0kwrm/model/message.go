@@ -94,6 +94,7 @@ func (m *Message) Edit(db *sql.DB) (*Message, error) {
 // ...
 func (m *Message) Delete(db *sql.DB) (*Message, error) {
 	_, err := db.Exec(`delete from message where id=?`, m.ID)
+
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +103,5 @@ func (m *Message) Delete(db *sql.DB) (*Message, error) {
 		ID:       m.ID,
 		Body:     m.Body,
 		Username: m.Username,
-		// Tutorial 1-2. ユーザー名を追加しよう
 	}, nil
 }

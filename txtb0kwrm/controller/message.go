@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/txtb0kwrm/httputil"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/txtb0kwrm/model"
@@ -126,5 +127,22 @@ func (m *Message) UpdateByID(c *gin.Context) {
 func (m *Message) DeleteByID(c *gin.Context) {
 	// Mission 1-2. メッセージを削除しよう
 	// ...
+	var msg model.Message
+	i := c.Param("id")
+	id, err := strconv.ParseInt(i, 10, 64)
+
+	if err := c.BindJSON(&msg); err != nil {
+		resp := httputil.NewErrorResponse(err)
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	_, err = msg.Delete(m.DB, id)
+	// bot対応
+
+	if err != nil {
+		resp := httputil.NewErrorResponse(err)
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{})
 }
