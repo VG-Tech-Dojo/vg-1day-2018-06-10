@@ -91,27 +91,29 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 func (p *ChatBotProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	r := regexp.MustCompile("\\Atalk (.+)")
 	matchedStrings := r.FindStringSubmatch(msgIn.Body)
-	if len(matchedStrings) != 2 {
-		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
-	}
 
 	text := matchedStrings[1]
 
-	requestURL := fmt.Sprintf(chatbotAPIURLFormat, env.ChatBotAPIAppID, url.QueryEscape(text))
+	params := url.Values{}
+	params.Set("apikey", env.ChatBotAPIAppID)
+	params.Add("query", text)
+	
+	res := &struct {
+		Status int64 `json:status`
+		Message string `json:message`
+		Results []struct {
+			Perplexity float64 `json:perplexity`
+			Reply string `json:reply`
+		} `json:results`
+	}{}
 
-	type chatbotAPIResponse map[string]interface{}
-	var response chatbotAPIResponse
-	get(requestURL, &response)
+	post(chatbotAPIURLFormat, params, res)
 
-	reply := make([]string, 0, len(response))
-	for k, v := range response {
-		if k == "Error" {
-			return nil, fmt.Errorf("%#v", v)
-		}
-		reply = append(reply, k)
+	if res.Status != 0 {
+		return nil, fmt.Errorf("%#v", res)
 	}
 
 	return &model.Message{
-		Body: strings.Join(reply, ","),
+		Body: res.Results[0].Reply,
 	}, nil
 }
