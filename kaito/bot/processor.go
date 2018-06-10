@@ -13,6 +13,7 @@ import (
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
+	chatAPIURLFormat = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 )
 
 type (
@@ -29,6 +30,8 @@ type (
 
 	// KeywordProcessor はメッセージ本文からキーワードを抽出するprocessorの構造体です
 	KeywordProcessor struct{}
+
+	ChatProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
@@ -80,5 +83,32 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 
 	return &model.Message{
 		Body: "キーワード：" + strings.Join(keywords, ", "),
+	}, nil
+}
+
+func (p *ChatProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+	r := regexp.MustCompile("\\Achat (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	if len(matchedStrings) != 2 {
+		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
+	}
+
+	text := matchedStrings[1]
+
+	type keywordAPIResponse map[string]interface{}
+	var response keywordAPIResponse
+	post(chatAPIURLFormat, url.Values{"apikey": {env.ChatAPIKey}, "query": {text}}, &response)
+
+	for k, v := range response {
+		if k == "Error" {
+			return nil, fmt.Errorf("%#v", v)
+		}
+		if k == "results"{
+			// TODO: v["reply"] を参照して返す
+		}
+	}
+
+	return &model.Message{
+		Body: "kaeriti",
 	}, nil
 }
