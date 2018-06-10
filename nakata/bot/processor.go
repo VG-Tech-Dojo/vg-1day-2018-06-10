@@ -18,6 +18,7 @@ import (
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
 	chatAPIURLFormat    = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
+	hatenaAPIURLFormat  = "http://b.hatena.ne.jp/entry/jsonlite/?url=%s"
 )
 
 type BitflyerTicker struct {
@@ -55,6 +56,8 @@ type (
 	BtcProcessor struct{}
 
 	SpreadProcessor struct {}
+
+	HatenaProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
@@ -155,15 +158,12 @@ func (p *ChatProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	}, nil
 }
 
+
 // Process は"大吉", "吉", "中吉", "小吉", "末吉", "凶"のいずれかがbodyにセットされたメッセージへのポインタを返します
 func (p *BtcProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 
 	r := regexp.MustCompile("\\Abtc (.+)")
 	matchedStrings := r.FindStringSubmatch(msgIn.Body)
-	if len(matchedStrings) != 2 {
-		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
-	}
-
 	exchange := matchedStrings[1]
 	var str string
 
@@ -316,3 +316,31 @@ func (p *SpreadProcessor) Process(msgIn *model.Message) (*model.Message, error) 
 	}, nil
 }
 
+
+// Process はメッセージ本文からキーワードを抽出します
+func (p *HatenaProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+	r := regexp.MustCompile("\\Ahatena (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	if len(matchedStrings) != 2 {
+		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
+	}
+	in_url := matchedStrings[1]
+	requestURL := fmt.Sprintf(hatenaAPIURLFormat, url.QueryEscape(in_url))
+
+	response := &struct {
+		Title     string `json:status`
+		Bookmarks []struct {
+			Comment string `json:comment`
+		} `json:bookmarks`
+	}{}
+	err := get(requestURL, &response)
+
+	fmt.Println(requestURL)
+	fmt.Println(response)
+	if err != nil {
+		return nil, fmt.Errorf("%#v", err)
+	}
+	return &model.Message{
+		Body: response.Bookmarks[0].Comment,
+	}, nil
+}
