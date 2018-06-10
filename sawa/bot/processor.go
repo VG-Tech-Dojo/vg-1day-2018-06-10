@@ -13,6 +13,7 @@ import (
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
+	chatAPIURLFormat    = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk?apikey=%s&query=%s"
 )
 
 type (
@@ -32,6 +33,9 @@ type (
 
 	// GachaProcessor はGachaBotの判定ロジックを持つための構造体です
 	GachaProcessor struct{}
+
+	// ChatProcessor は返答を作るprocessorの構造体です
+	ChatProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
@@ -85,6 +89,35 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 	get(requestURL, &response)
 
 	keywords := make([]string, 0, len(response))
+	for k, v := range response {
+		if k == "Error" {
+			return nil, fmt.Errorf("%#v", v)
+		}
+		keywords = append(keywords, k)
+	}
+
+	return &model.Message{
+		Body: "キーワード：" + strings.Join(keywords, ", "),
+	}, nil
+}
+
+// Process は返答を作る
+func (p *ChatProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+	r := regexp.MustCompile("\\Atalk\\z")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	if len(matchedStrings) != 2 {
+		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
+	}
+
+	text := matchedStrings[1]
+
+	requestURL := fmt.Sprintf(chatAPIURLFormat, env.ChatAPIAppID, url.QueryEscape(text))
+
+	type chatAPIResponse map[string]interface{}
+	var response chatAPIResponse
+	get(requestURL, &response)
+
+	chats := make([]string, 0, len(response))
 	for k, v := range response {
 		if k == "Error" {
 			return nil, fmt.Errorf("%#v", v)
