@@ -10,12 +10,21 @@ import (
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/env"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/model"
+	"net/http"
+	"io/ioutil"
+	"encoding/json"
+
 )
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
 	chatAPIURLFormat    = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 )
+
+type Ticker struct {
+	Symbol string     `json:"product_code"`
+	Price string   `json:"best_ask"`
+}
 
 type (
 	// Processor はmessageを受け取り、投稿用messageを作るインターフェースです
@@ -35,6 +44,8 @@ type (
 	GachaProcessor struct{}
 
 	ChatProcessor struct{}
+
+	BtcProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
@@ -132,5 +143,28 @@ func (p *ChatProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 
 	return &model.Message{
 		Body: response.Results[0].Reply,
+	}, nil
+}
+
+// Process は"大吉", "吉", "中吉", "小吉", "末吉", "凶"のいずれかがbodyにセットされたメッセージへのポインタを返します
+func (p *BtcProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+	url := "https://api.bitflyer.jp/v1/ticker"
+	resp, _ := http.Get(url)
+	defer resp.Body.Close()
+
+	b, _ := ioutil.ReadAll(resp.Body)
+
+	var ticker string = string(b)
+	jsonBytes := ([]byte)(ticker)
+	data := new(Ticker)
+
+	if err := json.Unmarshal(jsonBytes, data); err != nil {
+		return nil, fmt.Errorf("%#v", err)
+	}
+
+	var result = data.Price
+
+	return &model.Message{
+		Body: result,
 	}, nil
 }

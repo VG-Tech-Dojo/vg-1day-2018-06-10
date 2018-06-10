@@ -134,3 +134,19 @@ func NewChatBot(out chan *model.Message) *Bot {
 		processor: processor,
 	}
 }
+
+func NewBtcBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Abtc\\z")
+
+	processor := &BtcProcessor{}
+
+	return &Bot{
+		name:      "btcprocessor",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+}
