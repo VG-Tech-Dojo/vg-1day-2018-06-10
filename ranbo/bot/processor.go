@@ -13,7 +13,7 @@ import (
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
-	talkAPIURLFormat = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
+	talkAPIURLFormat    = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 	youtubeAPIURLFormat = "https://www.googleapis.com/youtube/v3/search?part=id&type=video&key=%s&q=%s"
 )
 
@@ -92,6 +92,7 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 		Body: "キーワード：" + strings.Join(keywords, ", "),
 	}, nil
 }
+
 // youtube bot
 func (p *YoutubeProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	r := regexp.MustCompile("\\Ayoutube (.+)")
@@ -106,27 +107,38 @@ func (p *YoutubeProcessor) Process(msgIn *model.Message) (*model.Message, error)
 
 	type youtubeAPIResponse map[string]interface{}
 
-	res := &struct{
+	res := &struct {
 		Items []struct {
-				Id struct{
-					VideoId string `json:videoid`
-				} `json:id`
-			} `json:items`
+			Id struct {
+				VideoId string `json:videoid`
+			} `json:id`
+		} `json:items`
 	}{}
 	get(requestURL, res)
 
-
+	fmt.Println(res.Items)
 
 	// set videos this
-	videos := "https://www.youtube.com/watch?v=" + res.Items[0].Id.VideoId
+	var maxlen int = len(res.Items)
+	if maxlen > 3 {
+		maxlen = 3
+	}
+	
+	var videos string
+	for i := 0; i < maxlen; i++ {
+		if i == 0 {
+			videos += "<video controls src=\"https://www.youtube.com/watch?v=" + res.Items[i].Id.VideoId + "\"></video><br>"
+			continue
+		}
+		videos += "<a href=\"https://www.youtube.com/watch?v=" + res.Items[i].Id.VideoId + "\">" + res.Items[i].Id.VideoId + "</a><br>"
+	}
 
 	return &model.Message{
 		Body: videos,
 	}, nil
 }
 
-
-func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error){
+func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	fortunes := []string{
 		"SSR",
 		"SR",
@@ -138,7 +150,6 @@ func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error){
 		Body: result,
 	}, nil
 }
-
 
 // func (p *KeywordProcessor) Talk(msgIn *model.Message) (*model.Message, error) {
 // 	r := regexp.MustCompile("\\Atalk (.+)")
