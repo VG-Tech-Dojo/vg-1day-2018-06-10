@@ -94,9 +94,20 @@ func (m *Message) Create(c *gin.Context) {
 
 // UpdateByID は...
 func (m *Message) UpdateByID(c *gin.Context) {
+	var msg model.Message
 	// Mission 1-1. メッセージを編集しよう
-	// ...
-	c.JSON(http.StatusCreated, gin.H{})
+	edited, err := msg.Edit(m.DB)
+	if err != nil {
+		resp := httputil.NewErrorResponse(err)
+		c.JSON(http.StatusInternalServerError, resp)
+		return
+	}
+	// bot対応
+	m.Stream <- edited
+	c.JSON(http.StatusCreated, gin.H{
+		"result": edited,
+		"error":  nil,
+	})
 }
 
 // DeleteByID は...
