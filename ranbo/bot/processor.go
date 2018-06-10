@@ -14,6 +14,7 @@ import (
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
 	talkAPIURLFormat = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
+	youtubeAPIURLFormat = ""
 )
 
 type (
@@ -34,6 +35,9 @@ type (
 	TalkProcessor struct{}
 
 	GachaProcessor struct{}
+
+	// youtube bot
+	YoutubeProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
@@ -88,6 +92,31 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 		Body: "キーワード：" + strings.Join(keywords, ", "),
 	}, nil
 }
+// youtube bot
+func (p *YoutubeProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+	r := regexp.MustCompile("\\Ayoutube (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	if len(matchedStrings) != 2 {
+		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
+	}
+
+	text := matchedStrings[1]
+
+	requestURL := fmt.Sprintf(youtubeAPIURLFormat, env.YoutubeAPIAppID, url.QueryEscape(text))
+
+	type youtubeAPIResponse map[string]interface{}
+	var response youtubeAPIResponse
+
+	get(requestURL, &response)
+	
+	// set videos this
+	videos := "videos"
+	
+	return &model.Message{
+		Body: videos,
+	}, nil
+}
+
 
 func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error){
 	fortunes := []string{
