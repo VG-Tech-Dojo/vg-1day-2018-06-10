@@ -3,18 +3,20 @@ package bot
 import (
 	"regexp"
 	"strings"
-
 	"fmt"
-
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/env"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/model"
 	"net/url"
+	"database/sql"
 )
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
 	chatbotAPIURLFormat = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 )
+
+
+
 
 type (
 	// Processor はmessageを受け取り、投稿用messageを作るインターフェースです
@@ -148,7 +150,7 @@ func (p *TipBotProcessor) Process(msgIn *model.Message) (*model.Message, error) 
 	target := user_amount[0]
 	amount := user_amount[1]
 
-	m.Tip(db, target, amount)
+	m.Tip(*sql.DB, target, amount)
 
 	return &model.Message{
 		Body: ""
