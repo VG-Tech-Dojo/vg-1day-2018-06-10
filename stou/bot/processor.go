@@ -6,9 +6,10 @@ import (
 
 	"fmt"
 
+	"net/url"
+
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/stou/env"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/stou/model"
-	"net/url"
 )
 
 const (
