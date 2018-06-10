@@ -103,7 +103,8 @@ func (m *Message) UpdateByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
-	
+	i := c.Param("id")
+	id, err := strconv.ParseInt(i, 10, 64)
 	edited, err := msg.Edit(m.DB)
 	if err != nil {
 		resp := httputil.NewErrorResponse(err)
