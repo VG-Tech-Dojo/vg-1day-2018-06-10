@@ -138,7 +138,7 @@ func NewChatBot(out chan *model.Message) *Bot {
 func NewBtcBot(out chan *model.Message) *Bot {
 	in := make(chan *model.Message)
 
-	checker := NewRegexpChecker("\\Abtc\\z")
+	checker := NewRegexpChecker("\\Abtc .+")
 
 	processor := &BtcProcessor{}
 
