@@ -3,8 +3,8 @@ package bot
 import (
 	"context"
 	"log"
-
-	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/model"
+	"fmt"
+	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/yuichiro-1/model"
 )
 
 type (
@@ -35,6 +35,7 @@ func (b *Bot) Run(ctx context.Context) {
 			return
 		case m := <-b.in:
 			if b.checker.Check(m) {
+				fmt.Printf("Bot name = %#v", b.name)
 				nm, err := b.processor.Process(m)
 				if err != nil {
 					log.Printf("%s: %#v\n", b.name, err)
@@ -94,40 +95,6 @@ func NewKeywordBot(out chan *model.Message) *Bot {
 
 	return &Bot{
 		name:      "keywordbot",
-		in:        in,
-		out:       out,
-		checker:   checker,
-		processor: processor,
-	}
-}
-
-// NewGachaBot はガチャします．
-func NewGachaBot(out chan *model.Message) *Bot {
-	in := make(chan *model.Message)
-
-	checker := NewRegexpChecker("\\Agacha\\z")
-
-	processor := &GachaProcessor{}
-
-	return &Bot{
-		name:      "gachabot",
-		in:        in,
-		out:       out,
-		checker:   checker,
-		processor: processor,
-	}
-}
-
-// NewChatBot はメッセージ本文からキーワードを抽出して返す新しいBotの構造体のポインタを返します
-func NewChatBot(out chan *model.Message) *Bot {
-	in := make(chan *model.Message)
-
-	checker := NewRegexpChecker("\\Atalk .+")
-
-	processor := &ChatProcessor{}
-
-	return &Bot{
-		name:      "chatbot",
 		in:        in,
 		out:       out,
 		checker:   checker,

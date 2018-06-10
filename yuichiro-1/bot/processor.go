@@ -6,15 +6,13 @@ import (
 
 	"fmt"
 
+	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/yuichiro-1/env"
+	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/yuichiro-1/model"
 	"net/url"
-
-	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/env"
-	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/model"
 )
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
-	chatAPIURLFormat    = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 )
 
 type (
@@ -31,30 +29,12 @@ type (
 
 	// KeywordProcessor はメッセージ本文からキーワードを抽出するprocessorの構造体です
 	KeywordProcessor struct{}
-
-	GachaProcessor struct{}
-
-	ChatProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
 func (p *HelloWorldProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	return &model.Message{
 		Body: msgIn.Body + ", world!",
-	}, nil
-}
-
-// Process は"大吉", "吉", "中吉", "小吉", "末吉", "凶"のいずれかがbodyにセットされたメッセージへのポインタを返します
-func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error) {
-	ranks := []string{
-		"SSレア",
-		"Sレア",
-		"レア",
-		"ノーマル",
-	}
-	result := ranks[randIntn(len(ranks))]
-	return &model.Message{
-		Body: result,
 	}, nil
 }
 
@@ -100,37 +80,5 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 
 	return &model.Message{
 		Body: "キーワード：" + strings.Join(keywords, ", "),
-	}, nil
-}
-
-// Process はメッセージ本文からキーワードを抽出します
-func (p *ChatProcessor) Process(msgIn *model.Message) (*model.Message, error) {
-	r := regexp.MustCompile("\\Atalk (.+)")
-	matchedStrings := r.FindStringSubmatch(msgIn.Body)
-	if len(matchedStrings) != 2 {
-		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
-	}
-
-	text := matchedStrings[1]
-
-	response := &struct {
-		Status  int64  `json:status`
-		Message string `json:message`
-		Results []struct {
-			Perplexity float64 `json:perplexity`
-			Reply      string  `json:reply`
-		} `json:results`
-	}{}
-	values := url.Values{}
-	values.Add("apikey", env.ChatAPIKey)
-	values.Add("query", text)
-	err := post(chatAPIURLFormat, values, response)
-
-	if err != nil {
-		return nil, fmt.Errorf("%#v", err)
-	}
-
-	return &model.Message{
-		Body: response.Results[0].Reply,
 	}, nil
 }

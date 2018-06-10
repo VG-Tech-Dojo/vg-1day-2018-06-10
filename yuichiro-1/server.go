@@ -8,10 +8,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/bot"
-	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/controller"
-	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/db"
-	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/model"
+	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/yuichiro-1/bot"
+	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/yuichiro-1/controller"
+	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/yuichiro-1/db"
+	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/yuichiro-1/model"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -84,13 +84,6 @@ func (s *Server) Init(dbconf, env string) error {
 	keywordBot := bot.NewKeywordBot(s.poster.In)
 	s.bots = append(s.bots, keywordBot)
 
-	chatBot := bot.NewChatBot(s.poster.In)
-	s.bots = append(s.bots, chatBot)
-
-	gachaBot := bot.NewGachaBot(s.poster.In)
-	s.bots = append(s.bots, gachaBot)
-
-
 	return nil
 }
 
@@ -106,7 +99,9 @@ func (s *Server) Run(port string) {
 
 	// botを起動
 	go s.multicaster.Run(ctx)
-	go s.poster.Run(ctx, fmt.Sprintf("http://0.0.0.0:%s", port))
+	go s.poster.Run(ctx, fmt.Sprintf("http://localhost:%s", port))
+
+	fmt.Printf("Bot num = %#v", len(s.bots))
 
 	for _, b := range s.bots {
 		go b.Run(ctx)

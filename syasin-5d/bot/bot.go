@@ -101,6 +101,7 @@ func NewKeywordBot(out chan *model.Message) *Bot {
 	}
 }
 
+
 // NewChatBot はメッセージ本文から返事を返す新しいBotの構造体のポインタを返します。
 func NewChatBot(out chan *model.Message) *Bot {
 	in := make(chan *model.Message)
@@ -111,9 +112,15 @@ func NewChatBot(out chan *model.Message) *Bot {
 
 	return &Bot{
 		name:      "chatbot",
-		in:        in,
-		out:       out,
-		checker:   checker,
-		processor: processor,
+
+func NewGachaBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Agacha\\z")
+
+	processor := &GachaProcessor{}
+
+	return &Bot{
+		name:      "gachabot",
 	}
 }
