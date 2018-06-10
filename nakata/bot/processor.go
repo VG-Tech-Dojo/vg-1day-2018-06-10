@@ -340,7 +340,14 @@ func (p *HatenaProcessor) Process(msgIn *model.Message) (*model.Message, error) 
 	if err != nil {
 		return nil, fmt.Errorf("%#v", err)
 	}
+	var out string
+	for _, v := range response.Bookmarks {
+		if v.Comment != "" {
+			out = v.Comment
+			break
+		}
+	}
 	return &model.Message{
-		Body: response.Bookmarks[0].Comment,
+		Body: out,
 	}, nil
 }
