@@ -97,14 +97,14 @@ func (m *Message) Update(db *sql.DB) (*Message, error) {
 // Mission 1-2. メッセージを削除しよう
 // ...
 
-func (m *Message) Tip(db *sql.DB, target string, amount int) (*Message, error){
+func (m *Message) Tip(db *sql.DB, target string, amount int64) (*Message, error){
 
-	var targetBalance int
+	var targetBalance int64
 	if err := db.QueryRow(`select balance from message where username = ?`, target).Scan(&targetBalance); err != nil {
 		return nil, err
 	}
 
-	var ownBalance int
+	var ownBalance int64
 	if err := db.QueryRow(`select balance from message where username = ?`, m.UserName).Scan(&ownBalance); err != nil {
 		return nil, err
 	}

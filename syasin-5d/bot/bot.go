@@ -3,7 +3,7 @@ package bot
 import (
 	"context"
 	"log"
-
+	"database/sql"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/model"
 )
 
@@ -127,12 +127,12 @@ func NewGachaBot(out chan *model.Message) *Bot {
 	}
 }
 
-func NewTipBot(out chan *model.Message) *Bot {
+func NewTipBot(out chan *model.Message, db *sql.DB) *Bot {
 	in := make(chan *model.Message)
 
 	checker := NewRegexpChecker("\\Atip .+")
 
-	processor := &TipBotProcessor{}
+	processor := &TipBotProcessor{DB : db}
 
 	return &Bot{
 		name:      "tipbot",
