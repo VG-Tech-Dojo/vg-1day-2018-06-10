@@ -13,6 +13,7 @@ import (
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
+	talkAPIURLFormat = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 )
 
 type (
@@ -29,6 +30,8 @@ type (
 
 	// KeywordProcessor はメッセージ本文からキーワードを抽出するprocessorの構造体です
 	KeywordProcessor struct{}
+
+	TalkProcessor struct{}
 
 	GachaProcessor struct{}
 )
@@ -70,6 +73,7 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 
 	type keywordAPIResponse map[string]interface{}
 	var response keywordAPIResponse
+
 	get(requestURL, &response)
 
 	keywords := make([]string, 0, len(response))
@@ -95,5 +99,37 @@ func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error){
 	result := fortunes[randIntn(len(fortunes))]
 	return &model.Message{
 		Body: result,
+	}, nil
+}
+
+
+func (p *KeywordProcessor) Talk(msgIn *model.Message) (*model.Message, error) {
+	r := regexp.MustCompile("\\Atalk (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	if len(matchedStrings) != 2 {
+		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
+	}
+
+	text := matchedStrings[1]
+
+	// requestURL := fmt.Sprintf(keywordAPIURLFormat, env.TalkAPIAppID, url.QueryEscape(text), "おはよう")
+
+	type keywordAPIResponse map[string]interface{}
+	var response keywordAPIResponse
+	val := url.Values{}
+	val.Set("apikey", env.KeywordAPIAppID)
+	val.Add("query", "おはよう")
+
+	post(talkAPIURLFormat, val, &response)
+	talks := make([]string, 0, len(response))
+	for k, v := range response {
+		if k == "Error" {
+			return nil, fmt.Errorf("%#v", v)
+		}
+		talks = append(talks, k)
+	}
+
+	return &model.Message{
+		Body: "キーワード：" + strings.Join(talks, ", "),
 	}, nil
 }
