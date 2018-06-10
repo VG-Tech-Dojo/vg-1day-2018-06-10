@@ -29,6 +29,9 @@ type (
 
 	// KeywordProcessor はメッセージ本文からキーワードを抽出するprocessorの構造体です
 	KeywordProcessor struct{}
+
+	// DiceProcessor はメッセージ本文からキーワードを抽出するprocessorの構造体です
+	DiceProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
@@ -69,6 +72,35 @@ func (p *OmikujiProcessor) Process(msgIn *model.Message) (*model.Message, error)
 
 // Process はメッセージ本文からキーワードを抽出します
 func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+	r := regexp.MustCompile("\\Akeyword (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	if len(matchedStrings) != 2 {
+		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
+	}
+
+	text := matchedStrings[1]
+
+	requestURL := fmt.Sprintf(keywordAPIURLFormat, env.KeywordAPIAppID, url.QueryEscape(text))
+
+	type keywordAPIResponse map[string]interface{}
+	var response keywordAPIResponse
+	get(requestURL, &response)
+
+	keywords := make([]string, 0, len(response))
+	for k, v := range response {
+		if k == "Error" {
+			return nil, fmt.Errorf("%#v", v)
+		}
+		keywords = append(keywords, k)
+	}
+
+	return &model.Message{
+		Body: "キーワード：" + strings.Join(keywords, ", "),
+	}, nil
+}
+
+// Process はメッセージ本文から面の数とダイスの数を抽出します
+func (p *DiceProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	r := regexp.MustCompile("\\Akeyword (.+)")
 	matchedStrings := r.FindStringSubmatch(msgIn.Body)
 	if len(matchedStrings) != 2 {
