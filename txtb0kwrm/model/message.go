@@ -99,9 +99,9 @@ func (m *Message) Delete(db *sql.DB) (*Message, error) {
 	}
 
 	return &Message{
-		ID:   m.ID,
-		Body: m.Body,
-		//Username: m.Username,
+		ID:       m.ID,
+		Body:     m.Body,
+		Username: m.Username,
 		// Tutorial 1-2. ユーザー名を追加しよう
 	}, nil
 }
