@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="message-body" v-else>
-        <span>{{ body }} - {{ username }}</span>
+        <span style="display:block;"><p v-html="body"></p> - {{username}}</span>
         <span class="action-button u-pull-right" v-on:click="edit">&#9998;</span>
         <span class="action-button u-pull-right" v-on:click="remove">&#10007;</span>
       </div>
@@ -49,7 +49,7 @@
             this.cancelEdit()
           })
       }
-    }
+   }
   });
 
   const app = new Vue({

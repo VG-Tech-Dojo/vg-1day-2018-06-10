@@ -127,10 +127,10 @@ func (p *YoutubeProcessor) Process(msgIn *model.Message) (*model.Message, error)
 	var videos string
 	for i := 0; i < maxlen; i++ {
 		if i == 0 {
-			videos += "<video controls src=\"https://www.youtube.com/watch?v=" + res.Items[i].Id.VideoId + "\"></video><br>"
+			videos += "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/" + res.Items[i].Id.VideoId + "\" frameborder=\"0\" allow=\"autoplay; encrypted-media\" allowfullscreen></iframe><br>"
 			continue
 		}
-		videos += "<a href=\"https://www.youtube.com/watch?v=" + res.Items[i].Id.VideoId + "\">" + res.Items[i].Id.VideoId + "</a><br>"
+		videos += "<a href=\"https://www.youtube.com/watch?v=" + res.Items[i].Id.VideoId + "\" target=\"_blank\">" + res.Items[i].Id.VideoId + "</a><br>"
 	}
 
 	return &model.Message{
