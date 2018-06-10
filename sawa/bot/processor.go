@@ -13,7 +13,7 @@ import (
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
-	chatAPIURLFormat    = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk?apikey=%s&query=%s"
+	chatAPIURLFormat    = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 )
 
 type (
@@ -105,27 +105,28 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 func (p *ChatProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	r := regexp.MustCompile("\\Atalk\\z")
 	matchedStrings := r.FindStringSubmatch(msgIn.Body)
-	if len(matchedStrings) != 2 {
-		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
-	}
-
 	text := matchedStrings[1]
 
-	requestURL := fmt.Sprintf(chatAPIURLFormat, env.ChatAPIAppID, url.QueryEscape(text))
+	params := url.Values{}
+	params.Set("apikey", env.TalkAPIKey)
+	params.Add("query", text)
 
-	type chatAPIResponse map[string]interface{}
-	var response chatAPIResponse
-	get(requestURL, &response)
+	res := &struct {
+		Status  int64  `json:status`
+		Message string `json:message`
+		Results []struct {
+			Perplexity float64 `json:perplexity`
+			Reply      string  `json:reply`
+		} `json:results`
+	}{}
 
-	chats := make([]string, 0, len(response))
-	for k, v := range response {
-		if k == "Error" {
-			return nil, fmt.Errorf("%#v", v)
-		}
-		keywords = append(keywords, k)
+	post(talkAPIURL, params, res)
+
+	if res.Status != 0 {
+		return nil, fmt.Errorf("%#v", res)
 	}
 
 	return &model.Message{
-		Body: "キーワード：" + strings.Join(keywords, ", "),
+		Body: res.Results[0].Reply,
 	}, nil
 }
