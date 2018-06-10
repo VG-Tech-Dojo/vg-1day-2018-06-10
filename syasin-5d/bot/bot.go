@@ -136,6 +136,11 @@ func NewTipBot(out chan *model.Message, db *sql.DB) *Bot {
 
 	return &Bot{
 		name:      "tipbot",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
 	}
+	
 }
 

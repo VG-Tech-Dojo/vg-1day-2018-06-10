@@ -78,7 +78,7 @@ func (m *Message) Insert(db *sql.DB) (*Message, error) {
 
 // Mission 1-1. メッセージを編集しよう
 // ...
-func (m *Message) Update(db *sql.DB) (*Message, error) {
+func (m *Message) Edit(db *sql.DB) (*Message, error) {
 	// Tutorial 1-2. ユーザー名を追加しよう
 	_, err := db.Exec(`update message set body = ? where id = ?`, m.Body, m.ID)
 	if err != nil {
@@ -95,7 +95,18 @@ func (m *Message) Update(db *sql.DB) (*Message, error) {
 	}, nil
 }
 // Mission 1-2. メッセージを削除しよう
+
 // ...
+func (m *Message) Delete(db *sql.DB)  error{
+	_, err := db.Exec(`delete from message where id = ?`, m.ID)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
 
 func (m *Message) Tip(db *sql.DB, target string, amount int64) (*Message, error){
 
