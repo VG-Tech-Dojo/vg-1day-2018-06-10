@@ -16,7 +16,6 @@ type (
 	//     out       chan *model.Message
 	//     checker   Checker
 	//     processor Processor
-	
 	Bot struct {
 		name      string
 		in        chan *model.Message
@@ -113,8 +112,6 @@ func NewChatBot(out chan *model.Message) *Bot {
 
 	return &Bot{
 		name:      "chatbot",
-	}
-}
 
 func NewGachaBot(out chan *model.Message) *Bot {
 	in := make(chan *model.Message)
@@ -127,16 +124,3 @@ func NewGachaBot(out chan *model.Message) *Bot {
 		name:      "gachabot",
 	}
 }
-
-func NewTipBot(out chan *model.Message) *Bot {
-	in := make(chan *model.Message)
-
-	checker := NewRegexpChecker("\\Atip .+")
-
-	processor := &TipBotProcessor{}
-
-	return &Bot{
-		name:      "tipbot",
-	}
-}
-
