@@ -13,6 +13,7 @@ import (
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
+	chatbotAPIURLFormat = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 )
 
 type (
@@ -29,6 +30,9 @@ type (
 
 	// KeywordProcessor はメッセージ本文からキーワードを抽出するprocessorの構造体です
 	KeywordProcessor struct{}
+
+	// ChatBotProcessor はメッセージ本文に返答するprocessorの構造体です
+	ChatBotProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
@@ -80,5 +84,34 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 
 	return &model.Message{
 		Body: "キーワード：" + strings.Join(keywords, ", "),
+	}, nil
+}
+
+// Talk はメッセージ本文からreplyを生成します
+func (p *ChatBotProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+	r := regexp.MustCompile("\\Atalk (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	if len(matchedStrings) != 2 {
+		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
+	}
+
+	text := matchedStrings[1]
+
+	requestURL := fmt.Sprintf(chatbotAPIURLFormat, env.ChatBotAPIAppID, url.QueryEscape(text))
+
+	type chatbotAPIResponse map[string]interface{}
+	var response chatbotAPIResponse
+	get(requestURL, &response)
+
+	reply := make([]string, 0, len(response))
+	for k, v := range response {
+		if k == "Error" {
+			return nil, fmt.Errorf("%#v", v)
+		}
+		reply = append(reply, k)
+	}
+
+	return &model.Message{
+		Body: strings.Join(reply, ","),
 	}, nil
 }

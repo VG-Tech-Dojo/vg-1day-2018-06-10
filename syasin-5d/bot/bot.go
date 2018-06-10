@@ -100,3 +100,20 @@ func NewKeywordBot(out chan *model.Message) *Bot {
 		processor: processor,
 	}
 }
+
+// NewChatBot はメッセージ本文から返事を返す新しいBotの構造体のポインタを返します。
+func NewChatBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Atalk .+")
+
+	processor := &ChatBotProcessor{}
+
+	return &Bot{
+		name:      "chatbot",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+}
