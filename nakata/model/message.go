@@ -94,17 +94,15 @@ func (m *Message) UpdateMessage(db *sql.DB) (*Message, error) {
 
 // RemoveMessage メッセージの削除
 func (m *Message) RemoveMessage(db *sql.DB) (*Message, error) {
-	res, err := db.Exec(`delete from message where id=?`, m.ID)
-	if err != nil {
-		return nil, err
-	}
-	id, err := res.LastInsertId()
+	_, err := db.Exec(`delete from message where id=?`, m.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Message{
-		ID: id,
+		ID:   m.ID,
+		Body: m.Body,
+		Name: m.Name,
 		// Tutorial 1-2. ユーザー名を追加しよう
 	}, nil
 }
