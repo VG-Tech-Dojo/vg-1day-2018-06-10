@@ -117,3 +117,19 @@ func NewGachaBot(out chan *model.Message) *Bot {
 	}
 }
 
+func NewTalkBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\ATalk .*")
+
+	processor := &TalkProcessor{}
+
+	return &Bot{
+		name:      "talk",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+}
+
