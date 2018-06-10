@@ -81,3 +81,13 @@ func (m *Message) UpdateById(db *sql.DB) (*Message, error) {
 
 // Mission 1-2. メッセージを削除しよう
 // ...
+
+func (m *Message) DeleteById(db *sql.DB) (*Message, error) {
+	_, err := db.Exec(`delete from  message where id = ?`, m.ID)
+	// Tutorial 1-1. ユーザー名を表示しよう
+	if  err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
