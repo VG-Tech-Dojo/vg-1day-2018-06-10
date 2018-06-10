@@ -73,5 +73,43 @@ func (m *Message) Insert(db *sql.DB) (*Message, error) {
 // Mission 1-1. メッセージを編集しよう
 // ...
 
+// UpdateMessage メッセージの更新
+func (m *Message) UpdateMessage(db *sql.DB) (*Message, error) {
+	_, err := db.Exec(`update message set values=? where id=?`, m.Body, m.ID)
+	if err != nil {
+		return nil, err
+	}
+	//id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Message{
+		ID:   m.ID,
+		Body: m.Body,
+		Name: m.Name,
+		// Tutorial 1-2. ユーザー名を追加しよう
+	}, nil
+}
+
+// RemoveMessage メッセージの削除
+func (m *Message) RemoveMessage(db *sql.DB) (*Message, error) {
+	res, err := db.Exec(`delete from message where id=?`, m.ID)
+	if err != nil {
+		return nil, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Message{
+		ID:   id,
+		Body: m.Body,
+		Name: m.Name,
+		// Tutorial 1-2. ユーザー名を追加しよう
+	}, nil
+}
+
 // Mission 1-2. メッセージを削除しよう
 // ...
