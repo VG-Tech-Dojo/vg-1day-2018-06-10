@@ -6,9 +6,10 @@ import (
 
 	"fmt"
 
+	"net/url"
+
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/env"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/model"
-	"net/url"
 )
 
 const (
@@ -29,12 +30,28 @@ type (
 
 	// KeywordProcessor はメッセージ本文からキーワードを抽出するprocessorの構造体です
 	KeywordProcessor struct{}
+
+	GachaProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
 func (p *HelloWorldProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	return &model.Message{
 		Body: msgIn.Body + ", world!",
+	}, nil
+}
+
+// Process は"大吉", "吉", "中吉", "小吉", "末吉", "凶"のいずれかがbodyにセットされたメッセージへのポインタを返します
+func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+	ranks := []string{
+		"SSレア",
+		"Sレア",
+		"レア",
+		"ノーマル",
+	}
+	result := ranks[randIntn(len(ranks))]
+	return &model.Message{
+		Body: result,
 	}, nil
 }
 
