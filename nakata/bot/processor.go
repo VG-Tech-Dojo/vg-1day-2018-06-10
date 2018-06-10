@@ -10,6 +10,9 @@ import (
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/env"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/nakata/model"
+	"net/http"
+	"io/ioutil"
+	"encoding/json"
 )
 
 const (
@@ -17,6 +20,19 @@ const (
 	chatAPIURLFormat    = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 	hatenaAPIURLFormat  = "http://b.hatena.ne.jp/entry/jsonlite/?url=%s"
 )
+
+type BitflyerTicker struct {
+	Symbol string     `json:"product_code"`
+	Price float64   `json:"best_ask"`
+}
+
+type CoincheckTicker struct {
+	Price float64   `json:"ask"`
+}
+
+type ZaifTicker struct {
+	Price float64   `json:"last_price"`
+}
 
 type (
 	// Processor はmessageを受け取り、投稿用messageを作るインターフェースです
@@ -36,6 +52,10 @@ type (
 	GachaProcessor struct{}
 
 	ChatProcessor struct{}
+
+	BtcProcessor struct{}
+
+	SpreadProcessor struct {}
 
 	HatenaProcessor struct{}
 )
@@ -138,6 +158,165 @@ func (p *ChatProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	}, nil
 }
 
+
+// Process は"大吉", "吉", "中吉", "小吉", "末吉", "凶"のいずれかがbodyにセットされたメッセージへのポインタを返します
+func (p *BtcProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+
+	r := regexp.MustCompile("\\Abtc (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	exchange := matchedStrings[1]
+	var str string
+
+	// bitflyer の振る舞い
+	if exchange == "bitflyer"{
+		url := "https://api.bitflyer.jp/v1/ticker"
+		resp, _ := http.Get(url)
+		defer resp.Body.Close()
+
+		b, _ := ioutil.ReadAll(resp.Body)
+
+		var ticker string = string(b)
+		jsonBytes := ([]byte)(ticker)
+		data := new(BitflyerTicker)
+
+		if err := json.Unmarshal(jsonBytes, data); err != nil {
+			return nil, fmt.Errorf("%#v", err)
+		}
+
+		str = fmt.Sprintf("bitflyerの%s価格は%f円", data.Symbol, data.Price)
+	}
+
+	// coincheck の振る舞い
+	if exchange == "coincheck"{
+		url := "https://coincheck.com/api/ticker"
+		resp, _ := http.Get(url)
+		defer resp.Body.Close()
+
+		b, _ := ioutil.ReadAll(resp.Body)
+
+		var ticker string = string(b)
+		jsonBytes := ([]byte)(ticker)
+		data := new(CoincheckTicker)
+
+		if err := json.Unmarshal(jsonBytes, data); err != nil {
+			return nil, fmt.Errorf("%#v", err)
+		}
+
+		str = fmt.Sprintf("coincheckのBTC価格は%f円", data.Price)
+	}
+
+	// zaif の振る舞い
+	if exchange == "zaif"{
+		url := "https://api.zaif.jp/api/1/last_price/btc_jpy"
+		resp, _ := http.Get(url)
+		defer resp.Body.Close()
+
+		b, _ := ioutil.ReadAll(resp.Body)
+
+		var ticker string = string(b)
+		jsonBytes := ([]byte)(ticker)
+		data := new(ZaifTicker)
+
+		if err := json.Unmarshal(jsonBytes, data); err != nil {
+			return nil, fmt.Errorf("%#v", err)
+		}
+
+		str = fmt.Sprintf("zaifのBTC価格は%f円", data.Price)
+	}
+
+	return &model.Message{
+		Body: str,
+	}, nil
+}
+
+
+
+func getPrice(exchange string) float64{
+	var price float64
+
+	// bitflyer の振る舞い
+	if exchange == "bitflyer"{
+		url := "https://api.bitflyer.jp/v1/ticker"
+		resp, _ := http.Get(url)
+		defer resp.Body.Close()
+
+		b, _ := ioutil.ReadAll(resp.Body)
+
+		var ticker string = string(b)
+		jsonBytes := ([]byte)(ticker)
+		data := new(BitflyerTicker)
+
+		if err := json.Unmarshal(jsonBytes, data); err != nil {
+			return 0
+		}
+
+		price = data.Price
+	}
+
+	// coincheck の振る舞い
+	if exchange == "coincheck"{
+		url := "https://coincheck.com/api/ticker"
+		resp, _ := http.Get(url)
+		defer resp.Body.Close()
+
+		b, _ := ioutil.ReadAll(resp.Body)
+
+		var ticker string = string(b)
+		jsonBytes := ([]byte)(ticker)
+		data := new(CoincheckTicker)
+
+		if err := json.Unmarshal(jsonBytes, data); err != nil {
+			return 0
+		}
+
+		price = data.Price
+	}
+
+	// zaif の振る舞い
+	if exchange == "zaif"{
+		url := "https://api.zaif.jp/api/1/last_price/btc_jpy"
+		resp, _ := http.Get(url)
+		defer resp.Body.Close()
+
+		b, _ := ioutil.ReadAll(resp.Body)
+
+		var ticker string = string(b)
+		jsonBytes := ([]byte)(ticker)
+		data := new(ZaifTicker)
+
+		if err := json.Unmarshal(jsonBytes, data); err != nil {
+			return 0
+		}
+
+		price = data.Price
+	}
+	return price
+}
+
+
+// Process は"大吉", "吉", "中吉", "小吉", "末吉", "凶"のいずれかがbodyにセットされたメッセージへのポインタを返します
+func (p *SpreadProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+
+	r := regexp.MustCompile("\\Aspread (.+) (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+
+
+	exchange1 := matchedStrings[1]
+	exchange2 := matchedStrings[2]
+
+	price1 := getPrice(exchange1)
+	price2 := getPrice(exchange2)
+
+	spread := price1 - price2
+
+	str := fmt.Sprintf("%s, %sのBTC価格差は%f円", exchange1, exchange2, spread)
+
+	return &model.Message{
+		Body: str,
+	}, nil
+}
+
+
 // Process はメッセージ本文からキーワードを抽出します
 func (p *HatenaProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	r := regexp.MustCompile("\\Ahatena (.+)")
@@ -145,7 +324,6 @@ func (p *HatenaProcessor) Process(msgIn *model.Message) (*model.Message, error) 
 	if len(matchedStrings) != 2 {
 		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
 	}
-
 	in_url := matchedStrings[1]
 	requestURL := fmt.Sprintf(hatenaAPIURLFormat, url.QueryEscape(in_url))
 

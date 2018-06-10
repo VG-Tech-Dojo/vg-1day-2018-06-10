@@ -135,6 +135,21 @@ func NewChatBot(out chan *model.Message) *Bot {
 	}
 }
 
+func NewBtcBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Abtc .+")
+
+	processor := &BtcProcessor{}
+
+	return &Bot{
+		name:      "btcprocessor",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+}
 // NewHatenaBot は．．
 func NewHatenaBot(out chan *model.Message) *Bot {
 	in := make(chan *model.Message)
@@ -151,3 +166,20 @@ func NewHatenaBot(out chan *model.Message) *Bot {
 		processor: processor,
 	}
 }
+
+func NewSpreadBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Aspread .+")
+
+	processor := &SpreadProcessor{}
+
+	return &Bot{
+		name:      "spreadprocessor",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+}
+
