@@ -117,21 +117,21 @@ func NewGachaBot(out chan *model.Message) *Bot {
 	}
 }
 
-func NewTalkBot(out chan *model.Message) *Bot {
-	in := make(chan *model.Message)
-
-	checker := NewRegexpChecker("\\Atalk .+")
-
-	processor := &TalkProcessor{}
-
-	return &Bot{
-		name:      "talkbot",
-		in:        in,
-		out:       out,
-		checker:   checker,
-		processor: processor,
-	}
-}
+//
+// func NewTalkBot(out chan *model.Message) *Bot {
+// 	in := make(chan *model.Message)
+// 	checker := NewRegexpChecker("\\Atalk .+")
+//
+//	processor := &TalkProcessor{}
+//
+//	return &Bot{
+//		name:      "talkbot",
+//		in:        in,
+//		out:       out,
+//		checker:   checker,
+//		processor: processor,
+//	}
+//}
 // youtube bot
 func NewYoutubeBot(out chan *model.Message) *Bot {
 	in := make(chan *model.Message)
