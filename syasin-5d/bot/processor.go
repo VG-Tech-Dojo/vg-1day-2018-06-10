@@ -36,6 +36,8 @@ type (
 
 	// GachaProcessor
 	GachaProcessor struct{}
+	// TipBotProcessor
+	TipBotProcessor struct{}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
@@ -133,5 +135,22 @@ func (p *ChatBotProcessor) Process(msgIn *model.Message) (*model.Message, error)
 	return &model.Message{
 		//Body: res.Results[0].Reply,
 		Body: "",
+	}, nil
+}
+
+// Process は, tipメッセージ "tip target amount" を解釈して、Tipメソッドを呼び出します
+func (p *TipBotProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+	r := regexp.MustCompile("\\Atip (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+
+	var user_amount []string
+	user_amount = strings.Split(matchedStrings[1], " ")
+	target := user_amount[0]
+	amount := user_amount[1]
+
+	m.Tip(db, target, amount)
+
+	return &model.Message{
+		Body: ""
 	}, nil
 }
