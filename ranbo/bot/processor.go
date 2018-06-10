@@ -14,7 +14,7 @@ import (
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
 	talkAPIURLFormat = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
-	youtubeAPIURLFormat = ""
+	youtubeAPIURLFormat = "https://www.googleapis.com/youtube/v3/search?part=id&type=video&key=%s&q=%s"
 )
 
 type (
@@ -107,11 +107,18 @@ func (p *YoutubeProcessor) Process(msgIn *model.Message) (*model.Message, error)
 	type youtubeAPIResponse map[string]interface{}
 	var response youtubeAPIResponse
 
-	get(requestURL, &response)
-	
+	res := &struct{
+		Items []struct {
+				Id struct{
+					VideoId string `json:videoid`
+				} `json:id`
+			} `json:items`
+	}
+	get(requestURL, res)
+
 	// set videos this
-	videos := "videos"
-	
+	videos :=
+
 	return &model.Message{
 		Body: videos,
 	}, nil
@@ -138,7 +145,7 @@ func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error){
 // 	if len(matchedStrings) != 2 {
 // 		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
 // 	}
-// 
+//
 // 	text := matchedStrings[1]
 //
 // 	// requestURL := fmt.Sprintf(keywordAPIURLFormat, env.TalkAPIAppID, url.QueryEscape(text), "おはよう")
