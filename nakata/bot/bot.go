@@ -117,3 +117,20 @@ func NewGachaBot(out chan *model.Message) *Bot {
 		processor: processor,
 	}
 }
+
+// NewChatBot はメッセージ本文からキーワードを抽出して返す新しいBotの構造体のポインタを返します
+func NewChatBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Atalk .+")
+
+	processor := &ChatProcessor{}
+
+	return &Bot{
+		name:      "chatbot",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+}
