@@ -2,6 +2,7 @@ package bot
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/sawa/model"
 )
@@ -21,7 +22,10 @@ func (p *Poster) Run(ctx context.Context, url string) {
 			close(p.In)
 			return
 		case m := <-p.In:
-			postJSON(url+"/api/messages", m, nil)
+			err := postJSON(url+"/api/messages", m, nil)
+			if err != nil {
+				fmt.Println("err")
+			}
 		}
 	}
 }

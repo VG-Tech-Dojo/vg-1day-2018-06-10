@@ -99,7 +99,7 @@ func (s *Server) Run(port string) {
 
 	// botを起動
 	go s.multicaster.Run(ctx)
-	go s.poster.Run(ctx, fmt.Sprintf("http://0.0.0.0:%s", port))
+	go s.poster.Run(ctx, fmt.Sprintf("http://localhost:%s", port))
 
 	for _, b := range s.bots {
 		go b.Run(ctx)
