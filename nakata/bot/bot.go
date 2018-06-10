@@ -150,3 +150,19 @@ func NewBtcBot(out chan *model.Message) *Bot {
 		processor: processor,
 	}
 }
+
+func NewSpreadBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Aspread .+")
+
+	processor := &SpreadProcessor{}
+
+	return &Bot{
+		name:      "spreadprocessor",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+}

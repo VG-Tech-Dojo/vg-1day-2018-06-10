@@ -53,6 +53,8 @@ type (
 	ChatProcessor struct{}
 
 	BtcProcessor struct{}
+
+	SpreadProcessor struct {}
 )
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
@@ -227,7 +229,7 @@ func (p *BtcProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	}, nil
 }
 
-/*
+
 
 func getPrice(exchange string) float64{
 	var price float64
@@ -295,19 +297,22 @@ func getPrice(exchange string) float64{
 // Process は"大吉", "吉", "中吉", "小吉", "末吉", "凶"のいずれかがbodyにセットされたメッセージへのポインタを返します
 func (p *SpreadProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 
-	r := regexp.MustCompile("\\Aspread (.+)")
+	r := regexp.MustCompile("\\Aspread (.+) (.+)")
 	matchedStrings := r.FindStringSubmatch(msgIn.Body)
-	if len(matchedStrings) != 2 {
-		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
-	}
 
-	exchange := matchedStrings[1]
 
-	str := fmt.Sprintf("%sのBTC価格は%f円", exchange, getPrice(exchange))
+	exchange1 := matchedStrings[1]
+	exchange2 := matchedStrings[2]
+
+	price1 := getPrice(exchange1)
+	price2 := getPrice(exchange2)
+
+	spread := price1 - price2
+
+	str := fmt.Sprintf("%s, %sのBTC価格差は%f円", exchange1, exchange2, spread)
 
 	return &model.Message{
 		Body: str,
 	}, nil
 }
 
-*/
