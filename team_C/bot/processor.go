@@ -106,26 +106,32 @@ func getReult(dice_msg string) string {
 	return input
 }
 
-func postDice(dice string) apiResponse {
+func postDice(dice string) (apiResponse, error) {
 	v := url.Values{}
 	v.Set("system", "Cthulhu")
 	v.Set("command", dice)
 
 	url := "https://www.taruki.com/bcdice-api/v1/diceroll?" + v.Encode()
 	var response apiResponse
-	get(url, &response)
+	err := get(url, &response)
 
-	return response
+	return response, err
 }
 
 // Process はメッセージ本文から面の数とダイスの数を抽出します
 func (p *DiceProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 
 	input := getReult(msgIn.Body) //2d6
-	res := postDice(input)
+	res, _ := postDice(input)
 
+	var msg string
+	if res.ToString() != "" {
+		msg = res.ToString()
+	} else {
+		msg = "ダイスロールに失敗しました"
+	}
 	return &model.Message{
-		Body: res.ToString(),
+		Body: msg,
 	}, nil
 }
 
