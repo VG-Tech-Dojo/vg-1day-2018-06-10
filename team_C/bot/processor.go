@@ -106,45 +106,26 @@ func getReult(dice_msg string) string {
 	return input
 }
 
-func postDice(dice string)apiResponse{
-		v := url.Values{}
-		v.Set("system", "Cthulhu")
-		v.Set("command", dice)
+func postDice(dice string) apiResponse {
+	v := url.Values{}
+	v.Set("system", "Cthulhu")
+	v.Set("command", dice)
 
-		url := "https://www.taruki.com/bcdice-api/v1/diceroll?" + v.Encode()
-		var response apiResponse
-		get(url, &response)
+	url := "https://www.taruki.com/bcdice-api/v1/diceroll?" + v.Encode()
+	var response apiResponse
+	get(url, &response)
 
-		return response
+	return response
 }
 
 // Process はメッセージ本文から面の数とダイスの数を抽出します
 func (p *DiceProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 
-	r := regexp.MustCompile("\\Akeyword (.+)")
-	matchedStrings := r.FindStringSubmatch(msgIn.Body)
-	if len(matchedStrings) != 2 {
-		return nil, fmt.Errorf("bad message: %s", msgIn.Body)
-	}
-
-	text := matchedStrings[1]
-
-	requestURL := fmt.Sprintf(keywordAPIURLFormat, env.KeywordAPIAppID, url.QueryEscape(text))
-
-	type keywordAPIResponse map[string]interface{}
-	var response keywordAPIResponse
-	get(requestURL, &response)
-
-	keywords := make([]string, 0, len(response))
-	for k, v := range response {
-		if k == "Error" {
-			return nil, fmt.Errorf("%#v", v)
-		}
-		keywords = append(keywords, k)
-	}
+	input := getReult(msgIn.Body) //2d6
+	res := postDice(input)
 
 	return &model.Message{
-		Body: "キーワード：" + strings.Join(keywords, ", "),
+		Body: res.ToString(),
 	}, nil
 }
 
