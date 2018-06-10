@@ -6,9 +6,10 @@ import (
 
 	"fmt"
 
+	"net/url"
+
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/team_C/env"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/team_C/model"
-	"net/url"
 )
 
 const (
@@ -126,4 +127,8 @@ func (p *DiceProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	return &model.Message{
 		Body: "キーワード：" + strings.Join(keywords, ", "),
 	}, nil
+}
+
+func (res apiResponse) ToString() string {
+	return strings.Replace(res.Result, ": ", "ダイスロール！", 1)
 }
