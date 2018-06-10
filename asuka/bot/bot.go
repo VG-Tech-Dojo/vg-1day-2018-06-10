@@ -118,3 +118,19 @@ func NewKeywordBot(out chan *model.Message) *Bot {
 		processor: processor,
 	}
 }
+// TalkAPI
+func NewChatBot(out chan *model.Message) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Atalk .+")
+
+	processor := &ChatProcessor{}
+
+	return &Bot{
+		name:      "chatbot",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+}
