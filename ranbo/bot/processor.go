@@ -105,7 +105,6 @@ func (p *YoutubeProcessor) Process(msgIn *model.Message) (*model.Message, error)
 	requestURL := fmt.Sprintf(youtubeAPIURLFormat, env.YoutubeAPIAppID, url.QueryEscape(text))
 
 	type youtubeAPIResponse map[string]interface{}
-	var response youtubeAPIResponse
 
 	res := &struct{
 		Items []struct {
@@ -113,11 +112,13 @@ func (p *YoutubeProcessor) Process(msgIn *model.Message) (*model.Message, error)
 					VideoId string `json:videoid`
 				} `json:id`
 			} `json:items`
-	}
+	}{}
 	get(requestURL, res)
 
+
+
 	// set videos this
-	videos :=
+	videos := "https://www.youtube.com/watch?v=" + res.Items[0].Id.VideoId
 
 	return &model.Message{
 		Body: videos,
