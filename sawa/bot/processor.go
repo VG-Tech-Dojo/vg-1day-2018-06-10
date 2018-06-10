@@ -13,7 +13,7 @@ import (
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
-	chatAPIURLFormat    = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
+	chatAPIURL          = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 )
 
 type (
@@ -108,7 +108,7 @@ func (p *ChatProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	text := matchedStrings[1]
 
 	params := url.Values{}
-	params.Set("apikey", env.TalkAPIKey)
+	params.Set("apikey", env.ChatAPIKey)
 	params.Add("query", text)
 
 	res := &struct {
@@ -120,7 +120,7 @@ func (p *ChatProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 		} `json:results`
 	}{}
 
-	post(talkAPIURL, params, res)
+	post(chatAPIURL, params, res)
 
 	if res.Status != 0 {
 		return nil, fmt.Errorf("%#v", res)
