@@ -58,7 +58,7 @@ func (m *Message) Insert(db *sql.DB) (*Message, error) {
 		return nil, err
 	}
 	// Tutorial 1-2. ユーザー名を追加しよう
-	res, err := db.Exec(`insert into message (body, username, balance) values (?, ?, ?)`, m.Body, m.UserName, m.Balance)
+	res, err := db.Exec(`insert into message (body, username, balance) values (?, ?, ?)`, m.Body, m.UserName, Balance)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (m *Message) Insert(db *sql.DB) (*Message, error) {
 		Body: m.Body,
 		// Tutorial 1-2. ユーザー名を追加しよう
 		UserName: m.UserName,
-		Balance: m.Balance,
+		Balance: Balance,
 	}, nil
 }
 

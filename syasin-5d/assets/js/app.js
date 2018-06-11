@@ -3,12 +3,12 @@
   const Message = function() {
     this.body = ''
     this.username = ''
-    this.balance = ''
+    this.Balance = ''
   };
 
   Vue.component('message', {
     // Tutorial 1-1. ユーザー名を表示しよう
-    props: ['id', 'body', 'username', 'balance', 'removeMessage', 'updateMessage'],
+    props: ['id', 'body', 'username', 'Balance', 'removeMessage', 'updateMessage'],
     data() {
       return {
         editing: false,
@@ -26,7 +26,7 @@
         </div>
       </div>
       <div class="message-body" v-else>
-        <span>{{ body }} - {{ username }} - {{ balance }}</span>
+        <span>{{ body }} - {{ username }} - {{ Balance }}</span>
         <span class="action-button u-pull-right" v-on:click="edit">&#9998;</span>
         <span class="action-button u-pull-right" v-on:click="remove">&#10007;</span>
       </div>
@@ -69,7 +69,8 @@
         });
       },
       sendMessage() {
-        const message = this.newMessage;
+          const message = this.newMessage;
+		  message.Balance = parseInt(message.Balance, 10);
         fetch('/api/messages', {
           method: 'POST',
           body: JSON.stringify(message)
