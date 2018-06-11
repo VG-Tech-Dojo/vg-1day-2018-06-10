@@ -3,18 +3,20 @@ package bot
 import (
 	"regexp"
 	"strings"
-
 	"fmt"
-
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/env"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/model"
 	"net/url"
+	"database/sql"
+	"strconv"
 )
 
 const (
 	keywordAPIURLFormat = "https://jlp.yahooapis.jp/KeyphraseService/V1/extract?appid=%s&sentence=%s&output=json"
 	chatbotAPIURLFormat = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
 )
+
+
 
 type (
 	// Processor はmessageを受け取り、投稿用messageを作るインターフェースです
@@ -31,14 +33,18 @@ type (
 	// KeywordProcessor はメッセージ本文からキーワードを抽出するprocessorの構造体です
 	KeywordProcessor struct{}
 
-
 	// ChatBotProcessor はメッセージ本文に返答するprocessorの構造体です
 	ChatBotProcessor struct{}
 
 	// GachaProcessor
 	GachaProcessor struct{}
-
+	// TipBotProcessor
+	TipBotProcessor struct{
+		DB *sql.DB
+	}
 )
+
+
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
 func (p *HelloWorldProcessor) Process(msgIn *model.Message) (*model.Message, error) {
@@ -76,8 +82,6 @@ func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	}, nil
 }
 
-
-
 // Process はメッセージ本文からキーワードを抽出します
 func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error) {
 	r := regexp.MustCompile("\\Akeyword (.+)")
@@ -109,31 +113,54 @@ func (p *KeywordProcessor) Process(msgIn *model.Message) (*model.Message, error)
 
 // Talk はメッセージ本文からreplyを生成します
 func (p *ChatBotProcessor) Process(msgIn *model.Message) (*model.Message, error) {
-	r := regexp.MustCompile("\\Atalk (.+)")
-	matchedStrings := r.FindStringSubmatch(msgIn.Body)
-
-	text := matchedStrings[1]
-
-	params := url.Values{}
-	params.Set("apikey", env.ChatBotAPIAppID)
-	params.Add("query", text)
-	
-	res := &struct {
-		Status int64 `json:status`
-		Message string `json:message`
-		Results []struct {
-			Perplexity float64 `json:perplexity`
-			Reply string `json:reply`
-		} `json:results`
-	}{}
-
-	post(chatbotAPIURLFormat, params, res)
-
-	if res.Status != 0 {
-		return nil, fmt.Errorf("%#v", res)
-	}
+	//	r := regexp.MustCompile("\\Atalk (.+)")
+	//	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+	//
+	//	text := matchedStrings[1]
+	//
+	//	params := url.Values{}
+	//	//	params.Set("apikey", env.ChatBotAPIAppID)
+	//	params.Add("query", text)
+	//
+	//	res := &struct {
+	//		Status  int64  `json:status`
+	//		Message string `json:message`
+	//		Results []struct {
+	//			Perplexity float64 `json:perplexity`
+	//			Reply      string  `json:reply`
+	//		} `json:results`
+	//	}{}
+	//
+	//	post(chatbotAPIURLFormat, params, res)
+	//
+	//	if res.Status != 0 {
+	//		return nil, fmt.Errorf("%#v", res)
+	//	}
+	//
 
 	return &model.Message{
-		Body: res.Results[0].Reply,
+		//Body: res.Results[0].Reply,
+		Body: "",
+	}, nil
+}
+
+// Process は, tipメッセージ "tip target amount" を解釈して、Tipメソッドを呼び出します
+func (p *TipBotProcessor) Process(msgIn *model.Message) (*model.Message, error) {
+
+	
+	
+	r := regexp.MustCompile("\\Atip (.+)")
+	matchedStrings := r.FindStringSubmatch(msgIn.Body)
+
+	var user_amount []string
+	user_amount = strings.Split(matchedStrings[1], " ")
+	target := user_amount[0]
+
+	amount, _ := strconv.ParseInt(user_amount[1], 10, 64)
+		
+	msgIn.Tip(p.DB, target, amount)
+
+	return &model.Message{
+		Body: "",
 	}, nil
 }

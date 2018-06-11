@@ -3,7 +3,7 @@ package bot
 import (
 	"context"
 	"log"
-
+	"database/sql"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/syasin-5d/model"
 )
 
@@ -16,6 +16,7 @@ type (
 	//     out       chan *model.Message
 	//     checker   Checker
 	//     processor Processor
+	
 	Bot struct {
 		name      string
 		in        chan *model.Message
@@ -101,26 +102,45 @@ func NewKeywordBot(out chan *model.Message) *Bot {
 	}
 }
 
-
 // NewChatBot はメッセージ本文から返事を返す新しいBotの構造体のポインタを返します。
 func NewChatBot(out chan *model.Message) *Bot {
-	in := make(chan *model.Message)
-
-	checker := NewRegexpChecker("\\Atalk .+")
-
-	processor := &ChatBotProcessor{}
-
+	//	in := make(chan *model.Message)
+	//
+	//	checker := NewRegexpChecker("\\Atalk .+")
+	//
+	//	processor := &ChatBotProcessor{}
+	//
 	return &Bot{
 		name:      "chatbot",
-
-func NewGachaBot(out chan *model.Message) *Bot {
-	in := make(chan *model.Message)
-
-	checker := NewRegexpChecker("\\Agacha\\z")
-
-	processor := &GachaProcessor{}
-
-	return &Bot{
-		name:      "gachabot",
 	}
 }
+
+func NewGachaBot(out chan *model.Message) *Bot {
+	//	in := make(chan *model.Message)
+	//
+	//	checker := NewRegexpChecker("\\Agacha\\z")
+	//
+	//	processor := &GachaProcessor{}
+
+	return &Bot{
+		name: "gachabot",
+	}
+}
+
+func NewTipBot(out chan *model.Message, db *sql.DB) *Bot {
+	in := make(chan *model.Message)
+
+	checker := NewRegexpChecker("\\Atip .+")
+
+	processor := &TipBotProcessor{DB : db}
+
+	return &Bot{
+		name:      "tipbot",
+		in:        in,
+		out:       out,
+		checker:   checker,
+		processor: processor,
+	}
+	
+}
+

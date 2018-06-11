@@ -2,7 +2,6 @@ package model
 
 import (
 	"database/sql"
-	"strconv"
 )
 
 // Message はメッセージの構造体です
@@ -11,13 +10,14 @@ type Message struct {
 	Body string `json:"body"`
 	// Tutorial 1-1. ユーザー名を表示しよう
 	UserName string `json:"username"`
+	Balance int `json:balance`
 }
 
 // MessagesAll は全てのメッセージを返します
 func MessagesAll(db *sql.DB) ([]*Message, error) {
 
 	// Tutorial 1-1. ユーザー名を表示しよう
-	rows, err := db.Query(`select id, body, username from message`)
+	rows, err := db.Query(`select id, body, username, balance from message`)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func MessagesAll(db *sql.DB) ([]*Message, error) {
 	for rows.Next() {
 		m := &Message{}
 		// Tutorial 1-1. ユーザー名を表示しよう
-		if err := rows.Scan(&m.ID, &m.Body, &m.UserName); err != nil {
+		if err := rows.Scan(&m.ID, &m.Body, &m.UserName, &m.Balance); err != nil {
 			return nil, err
 		}
 		ms = append(ms, m)
@@ -44,7 +44,7 @@ func MessageByID(db *sql.DB, id string) (*Message, error) {
 	m := &Message{}
 
 	// Tutorial 1-1. ユーザー名を表示しよう
-	if err := db.QueryRow(`select id, body, username from message where id = ?`, id).Scan(&m.ID, &m.Body, &m.UserName); err != nil {
+	if err := db.QueryRow(`select id, body, username, balance from message where id = ?`, id).Scan(&m.ID, &m.Body, &m.UserName, &m.Balance); err != nil {
 		return nil, err
 	}
 
@@ -53,8 +53,12 @@ func MessageByID(db *sql.DB, id string) (*Message, error) {
 
 // Insert はmessageテーブルに新規データを1件追加します
 func (m *Message) Insert(db *sql.DB) (*Message, error) {
+	var Balance int
+	if err := db.QueryRow(`select balance from message where username = ?`, m.UserName).Scan(&Balance); err != nil {
+		return nil, err
+	}
 	// Tutorial 1-2. ユーザー名を追加しよう
-	res, err := db.Exec(`insert into message (body, username) values (?, ?)`, m.Body, m.UserName)
+	res, err := db.Exec(`insert into message (body, username, balance) values (?, ?, ?)`, m.Body, m.UserName, Balance)
 	if err != nil {
 		return nil, err
 	}
@@ -68,26 +72,30 @@ func (m *Message) Insert(db *sql.DB) (*Message, error) {
 		Body: m.Body,
 		// Tutorial 1-2. ユーザー名を追加しよう
 		UserName: m.UserName,
+		Balance: Balance,
 	}, nil
 }
 
 // Mission 1-1. メッセージを編集しよう
 // ...
 func (m *Message) Edit(db *sql.DB) (*Message, error) {
+	// Tutorial 1-2. ユーザー名を追加しよう
 	_, err := db.Exec(`update message set body = ? where id = ?`, m.Body, m.ID)
+	if err != nil {
+		return nil, err
+	}
+	id, err := m.ID, nil
 
-	if err != nil {
-		return nil, err
-	}
-	id := strconv.FormatInt(m.ID, 10)
-	msg, err := MessageByID(db,id)
-	if err != nil {
-		return nil, err
-	}
-	return msg, nil
+	return &Message{
+		ID:   id,
+		Body: m.Body,
+		// Tutorial 1-2. ユーザー名を追加しよう
+		UserName: m.UserName,
+		Balance: m.Balance,
+	}, nil
 }
-
 // Mission 1-2. メッセージを削除しよう
+
 // ...
 func (m *Message) Delete(db *sql.DB)  error{
 	_, err := db.Exec(`delete from message where id = ?`, m.ID)
@@ -96,4 +104,29 @@ func (m *Message) Delete(db *sql.DB)  error{
 		return err
 	}
 	return nil
+}
+
+
+
+func (m *Message) Tip(db *sql.DB, target string, amount int64) (*Message, error){
+
+	var targetBalance int64
+	if err := db.QueryRow(`select balance from message where username = ?`, target).Scan(&targetBalance); err != nil {
+		return nil, err
+	}
+
+	var ownBalance int64
+	if err := db.QueryRow(`select balance from message where username = ?`, m.UserName).Scan(&ownBalance); err != nil {
+		return nil, err
+	}
+
+	_, err := db.Exec(`update message set balance = ? where username = ?`, targetBalance + amount, target)
+	if err != nil {
+		return nil, err
+	}
+	_, err = db.Exec(`update message set balance = ? where username = ?`, ownBalance - amount, m.UserName)
+	if err != nil {
+		return nil, err
+	}
+	return m.Insert(db)
 }
