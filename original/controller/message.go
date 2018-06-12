@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/original/httputil"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/original/model"
@@ -96,7 +97,34 @@ func (m *Message) Create(c *gin.Context) {
 func (m *Message) UpdateByID(c *gin.Context) {
 	// Mission 1-1. メッセージを編集しよう
 	// ...
-	c.JSON(http.StatusCreated, gin.H{})
+       var msg model.Message
+
+       if err := c.BindJSON(&msg); err != nil {
+               resp := httputil.NewErrorResponse(err)
+               c.JSON(http.StatusInternalServerError, resp)
+               return
+       }
+
+       i := c.Param("id")
+       id, err := strconv.ParseInt(i, 10, 64)
+       if err != nil {
+               resp := httputil.NewErrorResponse(err)
+               c.JSON(http.StatusBadRequest, resp)
+               return
+       }
+
+       msg.ID = id
+       updated, err := msg.Update(m.DB)
+       if err != nil {
+               resp := httputil.NewErrorResponse(err)
+               c.JSON(http.StatusInternalServerError, resp)
+               return
+       }
+
+       c.JSON(http.StatusOK, gin.H{
+               "result": updated,
+               "error":  nil,
+       })
 }
 
 // DeleteByID は...
