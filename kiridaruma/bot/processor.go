@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"fmt"
+	"time"
+	"math/rand"
 
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/kiridaruma/env"
 	"github.com/VG-Tech-Dojo/vg-1day-2018-06-10/kiridaruma/model"
@@ -29,7 +31,31 @@ type (
 
 	// KeywordProcessor はメッセージ本文からキーワードを抽出するprocessorの構造体です
 	KeywordProcessor struct{}
+
+	GachaProcessor struct{}
 )
+
+func (p *GachaProcessor) Process(msgIn *model.Message) (*model.Message, error){
+	rand.Seed(time.Now().UnixNano())
+
+	rand := rand.Intn(1000)
+	var msg string
+	switch{
+		case rand < 5:
+			msg = "SSレア"
+		case rand < 15:
+			msg = "Sレア"
+		case rand < 100:
+			msg = "レア"
+		default:
+			msg = "ノーマル"
+	}
+
+	return &model.Message{
+		Body: msg,
+		Username: "ガチャ",
+	}, nil
+}
 
 // Process は"hello, world!"というbodyがセットされたメッセージのポインタを返します
 func (p *HelloWorldProcessor) Process(msgIn *model.Message) (*model.Message, error) {
