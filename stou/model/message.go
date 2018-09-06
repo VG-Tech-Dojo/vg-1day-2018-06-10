@@ -70,8 +70,24 @@ func (m *Message) Insert(db *sql.DB) (*Message, error) {
 	}, nil
 }
 
-// Mission 1-1. メッセージを編集しよう
-// ...
+/*_Mission 1-1. メッセージを編集しよう
+  Edit はmessageテーブルに新規データを1件追加します*/
+func (m *Message) Edit(db *sql.DB) (*Message, error) {
+	// Tutorial 1-2. ユーザー名を追加しよう
+	res, err := db.Exec(`update message set body = ? where id = ?`, m.Body, m.ID)
+	if err != nil {
+		return nil, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Message{
+		ID:       id,
+		Body:     m.Body,
+		UserName: m.UserName,
+	}, nil
+}
 
 // Mission 1-2. メッセージを削除しよう
-// ...
